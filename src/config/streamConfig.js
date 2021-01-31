@@ -14,8 +14,8 @@ const r = new Snoowrap({
 
 const submissionstream = new SubmissionStream(r, {
   subreddit: process.env.SUBREDDIT,
-  limit: process.env.POLL_LIMIT * 1, // small hack to change it from string to a number
-  pollTime: process.env.POLL_TIME * 1 // same as above
+  limit: parseInt(process.env.POLL_LIMIT),
+  pollTime: parseInt(process.env.POLL_TIME)
 });
 
 module.exports = {stream: submissionstream, wrap: r};
