@@ -47,7 +47,7 @@ async function checkForAutomodComment(comments, wait, i = 1) {
             wait *= 2;
         }
         await new Promise(r => setTimeout(r, wait));
-        return checkForAutomodComment(post, wait, i + 1)
+        return checkForAutomodComment(comments, wait, i + 1)
     } else {
         logger.info('Automod comment found!');
         return c;
