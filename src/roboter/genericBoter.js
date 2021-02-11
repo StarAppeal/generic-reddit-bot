@@ -35,9 +35,9 @@ function startStream() {
           .then((c) => {
             if (c !== null) replyToComment(post, c);
           })
-          .catch((e) => logger.error(e));
+          .catch((e) => error(e, post));
       } catch (e) {
-        logger.error(e);
+        error(e, post);
       }
     });
   });
@@ -61,8 +61,7 @@ async function checkForAutomodComment(comments, wait, i = 1) {
     );
     logger.info("This was try #" + i);
     if (i === 10) {
-      logger.info("Couldn't find Automod after " + i + " tries, giving up.");
-      return null;
+      throw "Couldn't find Automod after " + i + " tries, giving up.";
     }
     await new Promise((r) => setTimeout(r, wait));
     return checkForAutomodComment(comments, wait, i + 1);
@@ -95,8 +94,24 @@ function replyToComment(post, comment) {
       logger.info("post request took " + result.timeNeeded + "ms!");
     })
     .catch((error) => {
-      logger.error(error);
+      error(error, post);
     });
+}
+
+function error(str, link = {}) {
+  try {
+    logger.error(str);
+    for (user of process.env.DEVELOPERS.split(",")) {
+      streamConfig.wrap.composeMessage({
+        to: user,
+        subject: process.env.BOT_NAME,
+        text: str + "\n" + link.permalink,
+      });
+    }
+  } catch (error) {
+    logger.error("Original error was: " + str);
+    logger.error(error);
+  }
 }
 
 module.exports = {
