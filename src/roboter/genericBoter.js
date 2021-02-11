@@ -47,15 +47,21 @@ async function checkForAutomodComment(comments, wait, i = 1) {
   logger.info("Searching for Automod comment...");
   var c;
   for (comment of comments) {
+    logger.info("Found comment: " + comment);
     if (comment.author_fullname === process.env.AUTOMOD_ID) {
+      logger.info("Comment is by Automod, yay!");
       c = comment;
+    } else {
+      logger.info("Comment is not by Automod");
     }
   }
   if (!c) {
-    logger.info("No Automod Comment found, checking again soon...");
+    logger.info(
+      "No Automod comment found, checking again in " + wait + "ms..."
+    );
     logger.info("This was try #" + i);
     if (i === 10) {
-      logger.info("Couldn't find autmod, after " + i + " tries, giving up.");
+      logger.info("Couldn't find Automod after " + i + " tries, giving up.");
       return null;
     }
     await new Promise((r) => setTimeout(r, wait));
