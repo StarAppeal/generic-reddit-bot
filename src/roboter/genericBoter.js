@@ -101,7 +101,7 @@ function replyToComment(post, comment) {
 function error(str, link = {}) {
   try {
     logger.error(str);
-    for (user of process.env.DEVELOPERS.split(",")) {
+    for (user of process.env.DEVELOPER.split(",")) {
       streamConfig.wrap.composeMessage({
         to: user,
         subject: process.env.BOT_NAME,
