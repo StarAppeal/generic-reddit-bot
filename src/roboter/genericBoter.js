@@ -47,7 +47,7 @@ async function checkForAutomodComment(comments, wait, i = 1) {
   logger.info("Searching for Automod comment...");
   var c;
   for (comment of comments) {
-    logger.info("Found comment: " + comment);
+    logger.info("Found comment: " + JSON.stringify(comment));
     if (comment.author_fullname === process.env.AUTOMOD_ID) {
       logger.info("Comment is by Automod, yay!");
       c = comment;
