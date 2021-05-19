@@ -25,50 +25,52 @@ function startStream() {
         " posted at: " +
         dateFormat(new Date(post.created_utc * 1000), "dd.mm.yyyy hh:MM:ss")
     );
-    streamConfig.wrap.getSubmission(post.id).comments.then(async (comments) => {
-      if (await alreadyReplied(post.id)) {
-        logger.info("Already replied to this post, gonna skip.");
-        return;
-      }
-      try {
-        checkForAutomodComment(comments, 60000)
-          .then((c) => {
-            if (c !== null) replyToComment(post, c);
-          })
-          .catch((e) => error(e, post));
-      } catch (e) {
-        error(e, post);
-      }
-    });
+    try {
+      checkForAutomodComment(post.id, 60000)
+        .then((c) => {
+          if (c !== null) replyToComment(post, c);
+        })
+        .catch((e) => error(e, post));
+    } catch (e) {
+      error(e, post);
+    }
   });
 }
 
-async function checkForAutomodComment(comments, wait, i = 1) {
-  logger.info("Searching for Automod comment...");
-  var c;
-  for (comment of comments) {
-    logger.info("Found comment: " + comment);
-    if (comment.author_fullname === process.env.AUTOMOD_ID) {
-      logger.info("Comment is by Automod, yay!");
-      c = comment;
+async function checkForAutomodComment(postId, wait, i = 1) {
+  streamConfig.wrap.getSubmission(postId).comments.then(async (comments) => {
+    if (await alreadyReplied(postId)) {
+      logger.info("Already replied to this post, gonna skip.");
+      return;
+    }
+
+    logger.info("Searching for Automod comment...");
+    var c;
+    for (comment of comments) {
+      logger.info(`Found comment: "${comment.body}"`);
+      console.log(comment.author_fullname);
+      if (comment.author_fullname === process.env.AUTOMOD_ID) {
+        logger.info("Comment is by Automod, yay!");
+        c = comment;
+      } else {
+        logger.info("Comment is not by Automod");
+      }
+    }
+    if (!c) {
+      logger.info(
+        "No Automod comment found, checking again in " + wait + "ms..."
+      );
+      logger.info("This was try #" + i);
+      if (i === 10) {
+        throw "Couldn't find Automod after " + i + " tries, giving up.";
+      }
+      await new Promise((r) => setTimeout(r, wait));
+      return checkForAutomodComment(postId, wait, i + 1);
     } else {
-      logger.info("Comment is not by Automod");
+      logger.info("Automod comment found!");
+      return c;
     }
-  }
-  if (!c) {
-    logger.info(
-      "No Automod comment found, checking again in " + wait + "ms..."
-    );
-    logger.info("This was try #" + i);
-    if (i === 10) {
-      throw "Couldn't find Automod after " + i + " tries, giving up.";
-    }
-    await new Promise((r) => setTimeout(r, wait));
-    return checkForAutomodComment(comments, wait, i + 1);
-  } else {
-    logger.info("Automod comment found!");
-    return c;
-  }
+  });
 }
 
 function replyToComment(post, comment) {
