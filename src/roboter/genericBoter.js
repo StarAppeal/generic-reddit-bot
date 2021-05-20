@@ -80,7 +80,7 @@ async function getModifiedText(text) {
 
   try {
     const response = await axios.post(process.env.REST_URL, textObject);
-    logger.info("POST request took " + result.timeNeeded + "ms");
+    logger.info("POST request took " + response.data.timeNeeded + "ms");
     return response.data.result;
   } catch (e) {
     throw e;
