@@ -4,68 +4,53 @@ const logger = require("../config/logger");
 
 const axios = require("axios");
 
-const alreadyReplied = (postId) =>
-  streamConfig.wrap
-    .getMe()
-    .getComments({
-      limit: Math.floor(process.env.POLL_LIMIT * 1.5), // removed posts won't get streamed, but the comments to these removed posts still show up.
-    })
-    .then((comments) => {
-      for (comment of comments) {
-        if (comment.link_id.includes(postId)) return true;
-      }
-      return false;
-    });
-
 function startStream() {
   streamConfig.stream.on("item", (post) => {
-    logger.info(
-      "found post with id: " +
-        post.id +
-        " and title " +
-        post.title +
-        " posted at: " +
-        dateFormat(new Date(post.created_utc * 1000), "dd.mm.yyyy hh:MM:ss")
-    );
-    try {
-      checkForAutomodComment(post.id, 60000)
-        .then((c) => {
-          if (c) replyToComment(post, c);
-        })
-        .catch((e) => error(e, post));
-    } catch (e) {
-      error(e, post);
-    }
+    processPost(post).catch((e) => error(e, post));
   });
 }
 
-async function checkForAutomodComment(postId, wait, i = 1) {
-  const comments = await getComments(postId);
-  if (await alreadyReplied(postId)) {
-    logger.info("Already replied to this post, gonna skip.");
+async function processPost(post) {
+  if (await replied(post.id)) {
+    logger.info("Already replied to this post, skipping it.");
     return;
   }
 
-  logger.info("Searching for Automod comment...");
-  var c;
-  for (comment of comments) {
-    if (comment.author_fullname === process.env.AUTOMOD_ID) {
-      logger.info("Comment is by Automod!");
-      c = comment;
+  logPost(post);
+  const wait = 60000;
+
+  let comments;
+  let automodComment;
+
+  for (var i = 0; i < 10; i++) {
+    if (i) {
+      logger.info(`No Automod found on try #${i}`);
+      logger.info(`Trying again in ${wait}ms`);
+      await new Promise((r) => setTimeout(r, wait));
+    }
+    comments = await getComments(post.id);
+    automodComment = extractAutomodComment(comments);
+    if (automodComment) {
+      break;
     }
   }
-  if (!c) {
-    logger.info(
-      "No Automod comment found, checking again in " + wait + "ms..."
-    );
-    logger.info("This was try #" + i);
-    if (i === 10) {
-      throw "Couldn't find Automod after " + i + " tries, giving up.";
-    }
-    await new Promise((r) => setTimeout(r, wait));
-    return checkForAutomodComment(postId, wait, i + 1);
-  } else {
-    return c;
+
+  if (!automodComment) {
+    throw "Couldn't find Automod comment :(";
+  }
+
+  logger.info("Found Automod");
+
+  if (process.argv[2] === "DEBUG") {
+    console.log("Not replying because you are developing");
+    return;
+  }
+
+  try {
+    const modifiedText = await getModifiedText(post.selftext);
+    await replyToComment(automodComment, modifiedText);
+  } catch (e) {
+    error(e, post);
   }
 }
 
@@ -73,41 +58,69 @@ async function getComments(postId) {
   return streamConfig.wrap.getSubmission(postId).comments;
 }
 
-function replyToComment(post, comment) {
-  if (process.argv[2] === "DEBUG") {
-    console.log("I would reply but im locally started so I do not. Sorry mate");
-    return;
-  }
-  let url = process.env.REST_URL;
-  let objectToSend = {
-    text: post.selftext,
-  };
-  logger.info("post requesting to url " + url);
-  logger.info(JSON.stringify(objectToSend));
-  axios
-    .post(url, objectToSend)
-    .then((response) => {
-      let result = response.data;
-      logger.info(
-        "Didn't reply to post with ID: " + post.id + "... reply to it now!"
-      );
-      comment.reply(result.result);
-      logger.info("Text of reply was: " + result.result);
-      logger.info("post request took " + result.timeNeeded + "ms!");
-    })
-    .catch((error) => {
-      error(error, post);
-    });
+function extractAutomodComment(comments) {
+  return comments.find((c) => c.author_fullname === process.env.AUTOMOD_ID);
 }
 
-function error(str, link = {}) {
+async function replied(postId) {
+  const comments = await streamConfig.wrap.getMe().getComments({
+    limit: Math.floor(process.env.POLL_LIMIT * 1.5), // removed posts won't get streamed, but the comments to these removed posts still show up.
+  });
+
+  return comments.find((c) => c.link_id.includes(postId));
+}
+
+async function getModifiedText(text) {
+  let url = process.env.REST_URL;
+  const textObject = {
+    text: text,
+  };
+
+  logger.info("Getting modified text from " + url);
+
   try {
-    logger.error(str);
-    for (user of process.env.DEVELOPER.split(",")) {
+    const response = await axios.post(process.env.REST_URL, textObject);
+    logger.info("POST request took " + result.timeNeeded + "ms");
+    return response.data.result;
+  } catch (e) {
+    throw e;
+  }
+}
+
+async function replyToComment(comment, text) {
+  if (text.length > 10000) {
+    logger.info("Text too long");
+    try {
+      text = await getModifiedText("Text zu lang zum kommentieren :(");
+    } catch (e) {
+      throw e;
+    }
+  }
+  logger.info("Replying now");
+  comment.reply(text);
+  logger.info("Text of reply was: " + text);
+}
+
+function logPost(post) {
+  const strippedPost = {
+    id: post.id,
+    title: post.title,
+    created: dateFormat(
+      new Date(post.created_utc * 1000),
+      "dd.mm.yyyy hh:MM:ss"
+    ),
+  };
+  logger.info(`Found post: ${JSON.stringify(strippedPost)}`);
+}
+
+function error(str, post = {}) {
+  try {
+    logger.error([str, post.permalink].join(" "));
+    for (user of process.env.DEVELOPERS.split(",")) {
       streamConfig.wrap.composeMessage({
         to: user,
         subject: process.env.BOT_NAME,
-        text: str + "\n" + link.permalink,
+        text: str + "\n" + post.permalink,
       });
     }
   } catch (error) {
