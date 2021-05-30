@@ -2,6 +2,9 @@ require("dotenv").config();
 
 const app = require("./app");
 const http = require("http");
+const world = require("./routes/world");
+
+app.use("/hallo", world);
 const roboter = require("./roboter/genericBoter");
 
 var port = process.argv[2] === "DEBUG" ? 81 : process.env.PORT;
