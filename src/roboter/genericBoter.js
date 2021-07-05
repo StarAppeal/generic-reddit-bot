@@ -10,6 +10,38 @@ function startStream() {
   });
 }
 
+async function inboxLoop() {
+  while (true) {
+    await new Promise((r) => setTimeout(r, 5000));
+    streamConfig.wrap.getUnreadMessages().then((messages) => {
+      messages.forEach(async (msg, i) => {
+        if (msg.type === "username_mention") {
+          logger.info("MessageId is " + msg.id);
+          const ar = msg.parent_id.split("_");
+          let responseText;
+          if (ar[0] === "t1") {
+            responseText = await streamConfig.wrap.getComment(ar[1]).body;
+          } else if (ar[0] === "t3") {
+            responseText = await streamConfig.wrap.getSubmission(ar[1])
+              .selftext;
+          } else {
+            error("Unknown parentId Type: " + msg.parent_id);
+            return;
+          }
+          const modifiedText = await getModifiedText(responseText);
+          const replySuccessful = await replyToComment(
+            streamConfig.wrap.getComment(msg.id),
+            modifiedText
+          );
+          if (replySuccessful) {
+            streamConfig.wrap.markMessagesAsRead([msg]);
+          }
+        }
+      });
+    });
+  }
+}
+
 async function processPost(post) {
   if (await replied(post.id)) {
     logger.info("Already replied to this post, skipping it.");
@@ -41,17 +73,8 @@ async function processPost(post) {
 
   logger.info("Found Automod");
 
-  if (process.argv[2] === "DEBUG") {
-    console.log("Not replying because you are developing");
-    return;
-  }
-
-  try {
-    const modifiedText = await getModifiedText(post.selftext);
-    await replyToComment(automodComment, modifiedText);
-  } catch (e) {
-    error(e, post);
-  }
+  const modifiedText = await getModifiedText(post.selftext);
+  await replyToComment(automodComment, modifiedText);
 }
 
 async function getComments(postId) {
@@ -88,17 +111,24 @@ async function getModifiedText(text) {
 }
 
 async function replyToComment(comment, text) {
+  if (process.argv[2] === "DEBUG") {
+    console.log("Not replying because you are developing");
+    return false;
+  }
+
   if (text.length > 10000) {
     logger.info("Text too long");
     try {
       text = await getModifiedText("Text zu lang zum kommentieren :(");
     } catch (e) {
-      throw e;
+      error(e);
+      return false;
     }
   }
   logger.info("Replying now");
   comment.reply(text);
   logger.info("Text of reply was: " + text);
+  return true;
 }
 
 function logPost(post) {
@@ -113,7 +143,7 @@ function logPost(post) {
   logger.info(`Found post: ${JSON.stringify(strippedPost)}`);
 }
 
-function error(str, post = {}) {
+function error(str, post = { permalink: "Not set" }) {
   try {
     logger.error([str, post.permalink].join(" "));
     for (user of process.env.DEVELOPERS.split(",")) {
@@ -131,4 +161,5 @@ function error(str, post = {}) {
 
 module.exports = {
   startStream: startStream,
+  inboxLoop: inboxLoop,
 };
