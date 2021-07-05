@@ -15,7 +15,10 @@ async function inboxLoop() {
     await new Promise((r) => setTimeout(r, 5000));
     streamConfig.wrap.getUnreadMessages().then((messages) => {
       messages.forEach(async (msg, i) => {
-        if (msg.type === "username_mention") {
+        if (
+          msg.type === "username_mention" ||
+          msg.body.includes(`u/${process.env.BOT_NAME}`)
+        ) {
           logger.info("MessageId is " + msg.id);
           const ar = msg.parent_id.split("_");
           let responseText;
