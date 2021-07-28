@@ -78,7 +78,21 @@ async function processPost(post) {
 
   if (post.selftext) {
     const modifiedText = await getModifiedText(post.selftext);
-    await replyToComment(automodComment, modifiedText);
+    let replySuccessful = await replyToComment(automodComment, modifiedText);
+
+    let numberTries = 0;
+    while (!replySuccessful && numberTries <= 10) {
+      logger.info(
+        "There was an error while responding. Trying again in 10 minutes."
+      );
+      await new Promise((r) => setTimeout(r, 600000));
+      replySuccessful = await replyToComment(automodComment, modifiedText);
+      numberTries++;
+    }
+
+    if (numberTries > 10) {
+      logger.info("Too many errors, gave up");
+    }
   } else {
     logger.info("Empty text, not replying");
   }
