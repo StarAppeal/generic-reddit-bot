@@ -12,7 +12,7 @@ function startStream() {
 
 async function inboxLoop() {
   while (true) {
-    await new Promise((r) => setTimeout(r, 5000));
+    await new Promise((r) => setTimeout(r, 15000));
     streamConfig.wrap.getUnreadMessages().then((messages) => {
       messages.forEach(async (msg, i) => {
         if (
