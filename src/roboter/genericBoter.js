@@ -46,8 +46,8 @@ async function inboxLoop() {
 }
 
 async function processPost(post) {
-  if (await replied(post.id)) {
-    logger.info("Already replied to this post, skipping it.");
+  if (await hasReplied(post.id)) {
+    logger.info(`Already replied to post with id ${post.id}.`);
     return;
   }
 
@@ -88,7 +88,7 @@ function extractAutomodComment(comments) {
   return comments.find((c) => c.author_fullname === process.env.AUTOMOD_ID);
 }
 
-async function replied(postId) {
+async function hasReplied(postId) {
   const comments = await streamConfig.wrap.getMe().getComments({
     limit: Math.floor(process.env.POLL_LIMIT * 1.5), // removed posts won't get streamed, but the comments to these removed posts still show up.
   });
@@ -129,10 +129,15 @@ async function replyToComment(comment, text) {
     }
   }
   logger.info("Replying now");
-  comment
-    .reply(text)
-    .then(() => logger.info("Text of reply was: " + text))
-    .catch((error) => error(error));
+
+  try {
+    await comment.reply(text);
+    logger.info("Text of reply was: " + text);
+  } catch (error) {
+    error(error);
+    return false;
+  }
+
   return true;
 }
 
