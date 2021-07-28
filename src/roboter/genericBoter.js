@@ -76,8 +76,12 @@ async function processPost(post) {
 
   logger.info("Found Automod");
 
-  const modifiedText = await getModifiedText(post.selftext);
-  await replyToComment(automodComment, modifiedText);
+  if (post.selftext) {
+    const modifiedText = await getModifiedText(post.selftext);
+    await replyToComment(automodComment, modifiedText);
+  } else {
+    logger.info("Empty text, not replying");
+  }
 }
 
 async function getComments(postId) {
@@ -109,7 +113,7 @@ async function getModifiedText(text) {
     logger.info("POST request took " + response.data.timeNeeded + "ms");
     return response.data.result;
   } catch (e) {
-    throw e;
+    error(e);
   }
 }
 
@@ -133,8 +137,8 @@ async function replyToComment(comment, text) {
   try {
     await comment.reply(text);
     logger.info("Text of reply was: " + text);
-  } catch (error) {
-    error(error);
+  } catch (e) {
+    error(e);
     return false;
   }
 
