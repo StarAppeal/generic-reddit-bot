@@ -1,6 +1,6 @@
-const dateFormat = require("dateformat");
-const streamConfig = require("../config/streamConfig");
-const logger = require("../config/logger");
+/* const dateFormat = require("dateformat");
+const streamConfig = require("../config/streamConfigCreator");
+const logger = require("../creator/loggerCreator");
 
 const axios = require("axios");
 
@@ -132,10 +132,10 @@ async function getModifiedText(text) {
 }
 
 async function replyToComment(comment, text) {
-  // if (process.argv[2] === "DEBUG") {
-  //   console.log("Not replying because you are developing");
-  //   return false;
-  // }
+   if (process.argv[2] === "DEBUG") {
+     console.log("Not replying because you are developing");
+     return false;
+   }
 
   if (text.length > 10000) {
     logger.info("Text too long");
@@ -191,3 +191,4 @@ module.exports = {
   startStream: startStream,
   inboxLoop: inboxLoop,
 };
+ */

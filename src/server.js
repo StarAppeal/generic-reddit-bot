@@ -1,14 +1,19 @@
-require("dotenv").config();
+const bots = require("./config/robots.json").bots;
 
-const app = require("./app");
-const http = require("http");
+const GenericBot = require("./bot/genericBot")
 
-const roboter = require("./roboter/genericBoter");
+for (let i = 0; i < bots.length; i++) {
+  startBot(bots[i]);
+}
 
-var port = process.argv[2] === "DEBUG" ? 81 : process.env.PORT;
-
-http.createServer(app).listen(port, function () {
-  console.log("App listens on port: " + this.address().port);
-  roboter.inboxLoop();
-  roboter.startStream();
-});
+async function startBot(botConfig) {
+  let bot = new GenericBot(botConfig);
+  if (botConfig.respondToMentions) {
+    console.log("starting inboxLoop");
+    bot.inboxLoop();
+  }
+  //other stuff here
+  //  roboter.inboxLoop();
+  // roboter.startStream();
+  bot.startBot();
+}
