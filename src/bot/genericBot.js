@@ -7,6 +7,8 @@ const MessageHandler = require("./handlers/messageHandler");
 const CommentHandler = require("./handlers/commentHandler");
 const PostHandler = require("./handlers/postHandler");
 
+const valueTextToLong = "Text zu lang zum kommentieren :(";
+
 //TODO: we are currently not getting any notification if any error occurs
 
 module.exports = class GenericBot {
@@ -47,7 +49,19 @@ module.exports = class GenericBot {
         try {
             const response = await axios.post(url, textObject);
             this.logger.info("POST request took " + response.data.time + "ms");
-            return response.data.text;
+
+            const result = response.data.text;
+
+            if (result.length > 10000) {
+                this.logger.info("Text too long");
+                try {
+                    result = await #getModifiedText(valueTextToLong);
+                } catch (e) {
+                    this.logger.error(e);
+                }
+            }
+
+            return;
         } catch (e) {
             this.logger.error(e);
             return "";

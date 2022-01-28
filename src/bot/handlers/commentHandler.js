@@ -1,5 +1,3 @@
-//TODO
-
 module.exports = class CommentHandler {
     constructor(comment, logger) {
         this.comment = comment;
@@ -12,16 +10,6 @@ module.exports = class CommentHandler {
             return false;
         }
 
-        if (text.length > 10000) {
-            this.logger.info("Text too long");
-            try {
-                // TODO: how to do this beautifully?
-                // text = await getModifiedText("Text zu lang zum kommentieren :(");
-            } catch (e) {
-                this.logger.error(e);
-                return false;
-            }
-        }
         this.logger.info("Replying now");
         this.comment
             .reply(text)
