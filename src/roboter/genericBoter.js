@@ -41,7 +41,7 @@ async function inboxLoop() {
           }
         }
       });
-    });
+    }).catch(error => error(error));
   }
 }
 
@@ -124,8 +124,8 @@ async function getModifiedText(text) {
 
   try {
     const response = await axios.post(process.env.REST_URL, textObject);
-    logger.info("POST request took " + response.data.timeNeeded + "ms");
-    return response.data.result;
+    logger.info("POST request took " + response.data.time + "ms");
+    return response.data.text;
   } catch (e) {
     error(e);
   }
