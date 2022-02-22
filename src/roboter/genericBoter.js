@@ -132,10 +132,10 @@ async function getModifiedText(text) {
 }
 
 async function replyToComment(comment, text) {
-  // if (process.argv[2] === "DEBUG") {
-  //   console.log("Not replying because you are developing");
-  //   return false;
-  // }
+  if (process.argv[2] === "DEBUG") {
+    console.log("Not replying because you are developing");
+    return false;
+  }
 
   if (text.length > 10000) {
     logger.info("Text too long");
