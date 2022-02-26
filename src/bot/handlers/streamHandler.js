@@ -16,19 +16,28 @@ module.exports = class StreamHandler {
     }
 
     async getSubmission(messageId) {
-        return await this.streamConfig.wrap.getSubmission(messageId);
+        // dont know why fetch() is needed. :( 
+        return await this.streamConfig.wrap.getSubmission(messageId).fetch();
     }
 
     async getComment(messageId) {
         return await this.streamConfig.wrap.getComment(messageId);
     }
 
-    async inboxStream(callback){
+    async inboxStream(callback) {
         return this.streamConfig.inboxStream.on("item", callback);
     }
 
-    markMessagesAsRead(messages){
+    async postStream(callback){
+        return this.streamConfig.submissionStream.on("item", callback);
+    }
+
+    markMessagesAsRead(messages) {
         this.streamConfig.wrap.markMessagesAsRead(messages);
+    }
+
+    async getComments(postId) {
+        return streamConfig.wrap.getSubmission(postId).comments;
     }
 
 }
