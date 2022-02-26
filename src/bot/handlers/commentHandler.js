@@ -18,8 +18,4 @@ module.exports = class CommentHandler {
         return true;
     }
 
-    shouldCommentBeRespondedTo(respondToID){
-        return comment.author_fullname === respondToID; 
-    }
-
 }
