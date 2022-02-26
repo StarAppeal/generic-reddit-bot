@@ -22,6 +22,7 @@ module.exports = class GenericBot {
     }
 
     async inboxLoop() {
+        this.logger.info("starting inboxLoop for Bot: " + this.botConfig.name);
         this.streamHandler.inboxStream(async (msg) => {
             const messageHandler = new MessageHandler(msg, this.logger, this.streamHandler);
             if (messageHandler.isMention(this.botConfig.name)) {
