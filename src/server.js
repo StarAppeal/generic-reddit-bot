@@ -9,7 +9,6 @@ for (let i = 0; i < bots.length; i++) {
 async function startBot(botConfig) {
   let bot = new GenericBot(botConfig);
   if (botConfig.respondToMentions) {
-    console.log("starting inboxLoop for bot " + botConfig.name);
     bot.inboxLoop();
   }
   
