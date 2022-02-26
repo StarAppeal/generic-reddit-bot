@@ -12,6 +12,7 @@ const valueTextToLong = "Text zu lang zum kommentieren :(";
 const maxCommentLength = 10000;
 
 //TODO: we are currently not getting any notification if any error occurs
+//TODO: if no respondToID is set, automatically respond to the post
 
 module.exports = class GenericBot {
     constructor(botConfig) {
