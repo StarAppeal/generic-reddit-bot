@@ -1,6 +1,7 @@
+const axios = require("axios");
+
 const streamConfigCreator = require("../creator/streamConfigCreator");
 const loggerCreator = require("../creator/loggerCreator");
-const axios = require("axios");
 
 const StreamHandler = require("./handlers/streamHandler");
 const MessageHandler = require("./handlers/messageHandler");
@@ -8,6 +9,7 @@ const CommentHandler = require("./handlers/commentHandler");
 const PostHandler = require("./handlers/postHandler");
 
 const valueTextToLong = "Text zu lang zum kommentieren :(";
+const maxCommentLength = 10000;
 
 //TODO: we are currently not getting any notification if any error occurs
 
@@ -20,7 +22,6 @@ module.exports = class GenericBot {
 
     async inboxLoop() {
         this.streamHandler.inboxStream(async (msg) => {
-            this.logger.info(JSON.stringify(msg));
             const messageHandler = new MessageHandler(msg, this.logger, this.streamHandler);
             if (messageHandler.isMention(this.botConfig.name)) {
                 this.logger.info("MessageId is " + msg.id);
@@ -35,9 +36,20 @@ module.exports = class GenericBot {
     }
 
     async startBot() {
-        // start the goddamn bot
+        this.streamHandler.postStream(async (post) => {
+            const postHandler = new PostHandler(post, this.logger, this.botConfig.respondToID, this.streamHandler);
+            postHandler.logPost();
+            postHandler.shouldReplyTo(this.botConfig.name).then(async (comment) => {
+                this.logger.info("Post should be replied to.");
+                let modifiedText = await this.#getModifiedText(postHandler.getText());
+                let commentHandler = new CommentHandler(comment, this.logger);
+                commentHandler.reply(modifiedText);
+            }).catch(this.logger.info);
+        });
     }
 
+
+    //this is ugly
     async #getModifiedText(text) {
         const url = this.botConfig.restURL;
         const textObject = {
@@ -52,16 +64,16 @@ module.exports = class GenericBot {
 
             const result = response.data.text;
 
-            if (result.length > 10000) {
+            if (result.length > maxCommentLength) {
                 this.logger.info("Text too long");
                 try {
-                    result = await #getModifiedText(valueTextToLong);
+                    result = await this.#getModifiedText(valueTextToLong);
                 } catch (e) {
                     this.logger.error(e);
                 }
             }
 
-            return;
+            return result;
         } catch (e) {
             this.logger.error(e);
             return "";

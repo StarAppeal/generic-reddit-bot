@@ -18,15 +18,15 @@ function _createLogger(botConfig){
     },
     transports: [
       new transports.File({
-        filename: "./logs/" + botConfig.name + "_error.log",
+        filename: "./logs/" + botConfig.name + "/error.log",
         level: "error",
       }),
       new transports.File({
-        filename: "./logs/" + botConfig.name + "_info.log",
+        filename: "./logs/" + botConfig.name + "/info.log",
         level: "info",
       }),
       new transports.File({
-        filename: "./logs/" + botConfig.name + "_combined.log",
+        filename: "./logs/" + botConfig.name + "/combined.log",
       }),
     ],
   });
