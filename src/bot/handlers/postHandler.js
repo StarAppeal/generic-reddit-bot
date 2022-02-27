@@ -23,7 +23,7 @@ module.exports = class PostHandler {
                     this.logger.info(error);
                     if (tries <= maxAmountOfTries) {
                         this.logger.info("this was try number: " + tries)
-                        await sleep(6000);
+                        await sleep(60000);
                         await this.#renewPost();
                         return resolve(this.shouldReplyTo(botName, tries + 1));
                     } else {
