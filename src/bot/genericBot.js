@@ -64,7 +64,7 @@ module.exports = class GenericBot {
             const response = await axios.post(url, textObject);
             this.logger.info("POST request took " + response.data.time + "ms");
 
-            const result = response.data.text;
+            let result = response.data.text;
 
             if (result.length > maxCommentLength) {
                 this.logger.info("Text too long");
