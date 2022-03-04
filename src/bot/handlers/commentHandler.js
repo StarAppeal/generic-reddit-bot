@@ -14,7 +14,7 @@ module.exports = class CommentHandler {
         this.comment
             .reply(text)
             .then(() => this.logger.info("Text of reply was: " + text))
-            .catch((error) => this.logger.error(error));
+            .catch(this.logger.error);
         return true;
     }
 
