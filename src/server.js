@@ -1,10 +1,8 @@
-const bots = require("./config/robots.json").bots;
-
 const GenericBot = require("./bot/genericBot")
 
-for (let i = 0; i < bots.length; i++) {
-  startBot(bots[i]);
-}
+const bots = require("./config/robots.json").bots;
+
+bots.forEach(startBot);
 
 async function startBot(botConfig) {
   let bot = new GenericBot(botConfig);
