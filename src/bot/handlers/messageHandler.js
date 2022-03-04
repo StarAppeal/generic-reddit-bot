@@ -13,14 +13,15 @@ module.exports = class MessageHandler {
     }
 
     async getTextToRespond() {
-        const ar = this.message.parent_id.split("_");
-        if (ar[0] === "t1") {
-            return (await this.streamHandler.getComment(ar[1])).body;
-        } else if (ar[0] === "t3") {
-            return (await this.streamHandler.getSubmission(ar[1])).selftext;
-        }
-        this.logger.error("unknown parentId type " + this.message.parent_id);
-        return null;
+        return new Promise(async (resolve, reject) => {
+            const ar = this.message.parent_id.split("_");
+            if (ar[0] === "t1") {
+                resolve((await this.streamHandler.getComment(ar[1])).body);
+            } else if (ar[0] === "t3") {
+                resolve((await this.streamHandler.getSubmission(ar[1])).selftext);
+            }
+            reject("unknown parentId type " + this.message.parent_id);
+        });
     }
 
     markMessageAsRead() {
