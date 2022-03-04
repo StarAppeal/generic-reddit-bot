@@ -35,7 +35,7 @@ function _createLogger(botConfig){
   // If we're not in production then **ALSO** log to the `console`
   // with the colorized simple format.
   //
-  if (process.env.NODE_ENV !== "production") {
+  if (process.env.NODE_ENV === "development") {
     logger.add(
       new transports.Console({
         format: format.combine(format.colorize(), format.simple()),
