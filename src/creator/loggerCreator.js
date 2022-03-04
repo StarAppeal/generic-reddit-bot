@@ -28,7 +28,7 @@ function _createLogger(botName){
   });
   
   //
-  // If we're not in production then **ALSO** log to the `console`
+  // If we're in development mode then **ALSO** log to the `console`
   // with the colorized simple format.
   //
   if (process.env.NODE_ENV === "development") {
