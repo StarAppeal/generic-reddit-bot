@@ -1,0 +1,30 @@
+{
+   "bots": [
+      {
+         "name": "Name of your Bot",
+         "clientId": "<Your client ID>",
+         "clientSecret": "<Your Client Secret>",
+         "refreshToken": "<Your Client Refresh Token>",
+         "subreddit": "<Subreddit bot should operate on>",
+         "pollLimit": 20,
+         "pollTime": 5000,
+         "respondToID": "<ID of the user the bot should respond to>",
+         "respondToMentions": true,
+         "restURL": "<URL of your rest-service, which handles the text manipulation>",
+         "developers": "<developers>"
+      },
+      {
+         "name": "<Name of your Bot #2>",
+         "clientId": "<Your client ID #2>",
+         "clientSecret": "<Your Client Secret #2>",
+         "refreshToken": "<Your Client Refresh Token #2>",
+         "subreddit": "<Subreddit bot should operate on #2>",
+         "pollLimit": 20,
+         "pollTime": 5000,
+         "respondToID": "<ID of the user the bot should respond to #2>",
+         "respondToMentions": false,
+         "restURL": "<URL of your rest-service, which handles the text manipulation #2>",
+         "developers": "<developers #2, probably the same as above>"
+      }
+   ]
+}
