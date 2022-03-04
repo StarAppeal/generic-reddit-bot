@@ -1,3 +1,5 @@
+const messageTypeUsernameMention = 'username_mention'
+
 module.exports = class MessageHandler {
     constructor(message, logger, streamHandler) {
         this.message = message;
@@ -6,7 +8,7 @@ module.exports = class MessageHandler {
     }
 
     isMention(botName) {
-        return this.message.type === "username_mention" ||
+        return this.message.type === messageTypeUsernameMention ||
             this.message.body.includes(`u/${botName}`)
     }
 
