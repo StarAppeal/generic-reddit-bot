@@ -11,10 +11,6 @@ module.exports = class StreamHandler {
         });
     }
 
-    async getUnreadMessages() {
-        return this.streamConfig.wrap.getUnreadMessages();
-    }
-
     async getSubmission(messageId) {
         // dont know why fetch() is needed. :( 
         return await this.streamConfig.wrap.getSubmission(messageId).fetch();
