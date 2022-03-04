@@ -6,19 +6,21 @@ module.exports = class CommentHandler {
         this.logger = logger;
     }
 
-    async reply(text) {   
-        if (debug) {
+    async reply(text) {
+        if (!debug) {
             this.logger.info("Not replying because you are developing");
             return false;
         }
-
+        let result = false;
         this.logger.info("Replying now");
-        //falls hier ein error auftritt, wird trd. true returned
         this.comment
             .reply(text)
-            .then(() => this.logger.info("Text of reply was: " + text))
+            .then(() => {
+                this.logger.info("Text of reply was: " + text);
+                result = true;
+            })
             .catch((error) => this.logger.error(error));
-        return true;
+        return result;
     }
 
 }

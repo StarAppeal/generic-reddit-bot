@@ -33,6 +33,7 @@ module.exports = class GenericBot {
                     const comment = await this.streamHandler.getComment(msg.id);
                     const replySuccessful = await new CommentHandler(comment, this.logger).reply(modifiedText);
                     if (replySuccessful) {
+                        this.logger.info("marking message as read");
                         messageHandler.markMessageAsRead();
                     }
                 }).catch(this.logger.error);
