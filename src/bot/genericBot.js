@@ -28,12 +28,14 @@ module.exports = class GenericBot {
             this.logger.info("MessageId is " + msg.id);
             if (messageHandler.isMention(this.botConfig.name)) {
                 this.logger.info("message is a mention, gonna reply to it");
-                const modifiedText = await this.#getModifiedText(await messageHandler.getTextToRespond());
-                const comment = await this.streamHandler.getComment(msg.id);
-                const replySuccessful = await new CommentHandler(comment, this.logger).reply(modifiedText);
-                if (replySuccessful) {
-                    messageHandler.markMessageAsRead();
-                }
+                messageHandler.getTextToRespond().then(async text => {
+                    const modifiedText = await this.#getModifiedText(text);
+                    const comment = await this.streamHandler.getComment(msg.id);
+                    const replySuccessful = await new CommentHandler(comment, this.logger).reply(modifiedText);
+                    if (replySuccessful) {
+                        messageHandler.markMessageAsRead();
+                    }
+                }).catch(this.logger.error);
             }
         });
     }

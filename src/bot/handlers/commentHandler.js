@@ -13,6 +13,7 @@ module.exports = class CommentHandler {
         }
 
         this.logger.info("Replying now");
+        //falls hier ein error auftritt, wird trd. true returned
         this.comment
             .reply(text)
             .then(() => this.logger.info("Text of reply was: " + text))
