@@ -51,7 +51,6 @@ module.exports = class GenericBot {
     }
 
 
-    //this is ugly
     async #getModifiedText(text) {
         const url = this.botConfig.restURL;
         const textObject = {
