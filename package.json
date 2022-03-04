@@ -4,9 +4,7 @@
   "description": "Generic reddit bot",
   "main": "server.js",
   "scripts": {
-    "start": "node src/server.js",
-    "debug": "node src/server.js DEBUG",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "node src/server.js"
   },
   "repository": {
     "type": "git",
