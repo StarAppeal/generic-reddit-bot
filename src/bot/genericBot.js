@@ -44,7 +44,7 @@ module.exports = class GenericBot {
             postHandler.shouldReplyTo(this.botConfig.name).then(async (comment) => {
                 this.logger.info("Post should be replied to.");
                 let modifiedText = await this.#getModifiedText(postHandler.getText());
-                let commentHandler = new CommentHandler(comment, this.logger);
+                const commentHandler = new CommentHandler(comment, this.logger);
                 commentHandler.reply(modifiedText);
             }).catch(this.logger.info);
         });
