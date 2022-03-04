@@ -7,7 +7,7 @@ module.exports = class CommentHandler {
     }
 
     async reply(text) {
-        if (!debug) {
+        if (debug) {
             this.logger.info("Not replying because you are developing");
             return false;
         }
