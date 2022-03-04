@@ -55,7 +55,7 @@ module.exports = class GenericBot {
     }
 
 
-    //this is ugly
+    //this is ugly => rewrite to Promises? 
     async #getModifiedText(text) {
         const url = this.botConfig.restURL;
         const textObject = {
