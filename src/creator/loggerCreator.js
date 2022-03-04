@@ -22,10 +22,6 @@ function _createLogger(botName){
         level: "error",
       }),
       new transports.File({
-        filename: "./logs/" + botName + "/info.log",
-        level: "info",
-      }),
-      new transports.File({
         filename: "./logs/" + botName + "/combined.log",
       }),
     ],
