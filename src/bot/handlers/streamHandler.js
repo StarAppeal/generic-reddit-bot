@@ -5,9 +5,9 @@ module.exports = class StreamHandler {
 
     async sendPrivateMessage(to, subject, text) {
         this.streamConfig.wrap.composeMessage({
-            to: to,
-            subject: subject,
-            text: text,
+            to,
+            subject,
+            text,
         });
     }
 
