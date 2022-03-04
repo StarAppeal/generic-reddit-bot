@@ -46,4 +46,4 @@ function _createLogger(botConfig){
   return logger;
 }
 
-module.exports = {_createLogger};
+module.exports = {createLogger: _createLogger};
