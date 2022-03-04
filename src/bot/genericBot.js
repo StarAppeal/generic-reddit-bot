@@ -18,7 +18,7 @@ module.exports = class GenericBot {
     constructor(botConfig) {
         this.botConfig = botConfig;
         this.streamHandler = new StreamHandler(streamConfigCreator.createStreamConfig(botConfig));
-        this.logger = loggerCreator.createLogger(botConfig);
+        this.logger = loggerCreator.createLogger(botConfig.name);
     }
 
     async inboxLoop() {

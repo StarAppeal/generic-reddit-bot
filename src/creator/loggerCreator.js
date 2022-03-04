@@ -1,6 +1,6 @@
 const { createLogger, format, transports } = require("winston");
 
-function _createLogger(botConfig){
+function _createLogger(botName){
   let logger = createLogger({
     level: "info",
     format: format.combine(
@@ -14,19 +14,19 @@ function _createLogger(botConfig){
       format.json()
     ),
     defaultMeta: {
-      service: botConfig.name,
+      service: botName,
     },
     transports: [
       new transports.File({
-        filename: "./logs/" + botConfig.name + "/error.log",
+        filename: "./logs/" + botName + "/error.log",
         level: "error",
       }),
       new transports.File({
-        filename: "./logs/" + botConfig.name + "/info.log",
+        filename: "./logs/" + botName + "/info.log",
         level: "info",
       }),
       new transports.File({
-        filename: "./logs/" + botConfig.name + "/combined.log",
+        filename: "./logs/" + botName + "/combined.log",
       }),
     ],
   });
