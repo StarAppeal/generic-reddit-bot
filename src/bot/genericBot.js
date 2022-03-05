@@ -43,6 +43,7 @@ module.exports = class GenericBot {
     }
 
     async startBot() {
+        this.logger.info("starting bot " + this.botConfig.name)
         this.streamHandler.postStream(async (post) => {
             const postHandler = new PostHandler(post, this.logger, this.botConfig.respondToID, this.streamHandler);
             postHandler.logPost();
