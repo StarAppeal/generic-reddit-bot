@@ -30,7 +30,6 @@ module.exports = class GenericBot {
                 this.logger.info("message is a mention, gonna reply to it");
                 messageHandler.getTextToRespond().then(async text => {
                     this.#getModifiedText(text).then(async modifiedText => {
-                        console.log(modifiedText)
                         const comment = await this.streamHandler.getComment(msg.id);
                         const replySuccessful = await new CommentHandler(comment, this.logger).reply(modifiedText);
                         if (replySuccessful) {
@@ -50,7 +49,6 @@ module.exports = class GenericBot {
             postHandler.shouldReplyTo(this.botConfig.name).then(async (comment) => {
                 this.logger.info("Post should be replied to.");
                 this.#getModifiedText(postHandler.getText()).then(modifiedText => {
-                    console.log(modifiedText)
                     const commentHandler = new CommentHandler(comment, this.logger);
                     commentHandler.reply(modifiedText);
                 }).catch(this.logger.error);
