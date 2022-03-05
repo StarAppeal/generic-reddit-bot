@@ -28,16 +28,16 @@ module.exports = class GenericBot {
             this.logger.info("MessageId is " + msg.id);
             if (messageHandler.isMention(this.botConfig.name)) {
                 this.logger.info("message is a mention, gonna reply to it");
-                messageHandler.getTextToRespond().then(async text => {
-                    this.#getModifiedText(text).then(async modifiedText => {
-                        const comment = await this.streamHandler.getComment(msg.id);
-                        const replySuccessful = await new CommentHandler(comment, this.logger).reply(modifiedText);
-                        if (replySuccessful) {
-                            this.logger.info("marking message as read");
-                            messageHandler.markMessageAsRead();
-                        }
-                    }).catch(this.logger.error);              
-                }).catch(this.logger.error);
+                const comment = await this.streamHandler.getComment(msg.id);
+                const commentHandler = new CommentHandler(comment, this.logger);
+                messageHandler.getTextToRespond()
+                    .then(text => this.#getModifiedText(text))
+                    .then(modifiedText => commentHandler.reply(modifiedText))
+                    .then(reply => {
+                        this.logger.info("Text of reply was: " + reply);
+                        messageHandler.markMessageAsRead();
+                    })
+                    .catch(this.logger.error);
             }
         });
     }
@@ -46,19 +46,20 @@ module.exports = class GenericBot {
         this.streamHandler.postStream(async (post) => {
             const postHandler = new PostHandler(post, this.logger, this.botConfig.respondToID, this.streamHandler);
             postHandler.logPost();
-            postHandler.shouldReplyTo(this.botConfig.name).then(async (comment) => {
-                this.logger.info("Post should be replied to.");
-                this.#getModifiedText(postHandler.getText()).then(modifiedText => {
+            postHandler.shouldReply(this.botConfig.name)
+                .then(comment => {
                     const commentHandler = new CommentHandler(comment, this.logger);
-                    commentHandler.reply(modifiedText);
-                }).catch(this.logger.error);
-            }).catch(this.logger.info);
+                    this.logger.info("Post should be replied to.");
+                    this.#getModifiedText(postHandler.getText())
+                        .then(modifiedText => commentHandler.reply(modifiedText))
+                        .then(reply => this.logger.info("Text of reply was" + reply))
+                        .catch(this.logger.error);
+                }).catch(this.logger.info);
         });
     }
 
     async #getModifiedText(text) {
         return new Promise((resolve, reject) => {
-           
             const url = this.botConfig.restURL;
             const textObject = {
                 text: text,

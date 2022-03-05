@@ -10,7 +10,7 @@ module.exports = class PostHandler {
         this.streamHandler = streamHandler;
     }
 
-    async shouldReplyTo(botName, tries = 1) {
+    async shouldReply(botName, tries = 1) {
         return new Promise((resolve, reject) => {
             this.#findCommentToRespondTo().then(comment => {
                 comment.expandReplies().then(c => {
@@ -25,7 +25,7 @@ module.exports = class PostHandler {
                     this.logger.info("this was try number: " + tries)
                     await sleep(60000);
                     await this.#renewPost();
-                    return resolve(this.shouldReplyTo(botName, tries + 1));
+                    return resolve(this.shouldReply(botName, tries + 1));
                 } else {
                     return reject("max amount of tries (" + maxAmountOfTries + ") reached")
                 }
