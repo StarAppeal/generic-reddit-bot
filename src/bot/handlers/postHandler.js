@@ -57,10 +57,13 @@ module.exports = class PostHandler {
     async #findCommentToRespondTo() {
         return new Promise((resolve, reject) => {
             this.post.expandReplies().then(post => {
-                post.comments.forEach(comment => {
+                const comments = post.comments; 
+                comments.sort((a, b) => {
+                        return a.created_utc- b.created_utc; 
+                }).forEach(comment => {
                     if (comment.author_fullname === this.respondToID) {
                         resolve(comment);
-                    }
+                    }                  
                 });
                 reject(`No comment found with respondToID "${this.respondToID}".`);
             });
