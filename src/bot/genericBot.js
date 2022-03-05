@@ -29,13 +29,15 @@ module.exports = class GenericBot {
             if (messageHandler.isMention(this.botConfig.name)) {
                 this.logger.info("message is a mention, gonna reply to it");
                 messageHandler.getTextToRespond().then(async text => {
-                    const modifiedText = await this.#getModifiedText(text);
-                    const comment = await this.streamHandler.getComment(msg.id);
-                    const replySuccessful = await new CommentHandler(comment, this.logger).reply(modifiedText);
-                    if (replySuccessful) {
-                        this.logger.info("marking message as read");
-                        messageHandler.markMessageAsRead();
-                    }
+                    this.#getModifiedText(text).then(async modifiedText => {
+                        console.log(modifiedText)
+                        const comment = await this.streamHandler.getComment(msg.id);
+                        const replySuccessful = await new CommentHandler(comment, this.logger).reply(modifiedText);
+                        if (replySuccessful) {
+                            this.logger.info("marking message as read");
+                            messageHandler.markMessageAsRead();
+                        }
+                    }).catch(this.logger.error);              
                 }).catch(this.logger.error);
             }
         });
@@ -47,9 +49,11 @@ module.exports = class GenericBot {
             postHandler.logPost();
             postHandler.shouldReplyTo(this.botConfig.name).then(async (comment) => {
                 this.logger.info("Post should be replied to.");
-                const modifiedText = await this.#getModifiedText(postHandler.getText());
-                const commentHandler = new CommentHandler(comment, this.logger);
-                commentHandler.reply(modifiedText);
+                this.#getModifiedText(postHandler.getText()).then(modifiedText => {
+                    console.log(modifiedText)
+                    const commentHandler = new CommentHandler(comment, this.logger);
+                    commentHandler.reply(modifiedText);
+                }).catch(this.logger.error);
             }).catch(this.logger.info);
         });
     }
@@ -57,33 +61,24 @@ module.exports = class GenericBot {
 
     //TODO: rewrite to Promises? 
     async #getModifiedText(text) {
-        const url = this.botConfig.restURL;
-        const textObject = {
-            text: text,
-        };
+        return new Promise((resolve, reject) => {
+           
+            const url = this.botConfig.restURL;
+            const textObject = {
+                text: text,
+            };
 
-        this.logger.info("Getting modified text from " + url);
+            this.logger.info("Getting modified text from " + url);
 
-        try {
-            const response = await axios.post(url, textObject);
-            this.logger.info("POST request took " + response.data.time + "ms");
-
-            let result = response.data.text;
-
-            if (result.length > maxCommentLength) {
-                this.logger.info("Text too long");
-                try {
-                    result = await this.#getModifiedText(valueTextToLong);
-                } catch (e) {
-                    this.logger.error(e);
+            axios.post(url, textObject).then(response => {
+                this.logger.info("POST request took " + response.data.time + "ms");
+                let result = response.data.text;
+                if (result.length > maxCommentLength) {
+                    this.logger.info("Text too long");
+                    return resolve(this.#getModifiedText(valueTextToLong));
                 }
-            }
-
-            return result;
-        } catch (e) {
-            this.logger.error(e);
-            return "";
-        }
+                resolve(result);
+            }).catch(reject);
+        });
     }
-
 }
