@@ -1,6 +1,6 @@
 const dateFormat = require("dateformat");
 const maxAmountOfTries = 5;
-let sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
+const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
 
 module.exports = class PostHandler {
     constructor(post, logger, respondToID, streamHandler) {

@@ -24,7 +24,7 @@ module.exports = class StreamHandler {
         return this.streamConfig.inboxStream.on("item", callback);
     }
 
-    async postStream(callback){
+    async postStream(callback) {
         return this.streamConfig.submissionStream.on("item", callback);
     }
 

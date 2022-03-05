@@ -8,7 +8,7 @@ const bots = require("./config/robots.json").bots;
 bots.forEach(startBot);
 
 function startBot(botConfig) {
-  let bot = new GenericBot(botConfig);
+  const bot = new GenericBot(botConfig);
   if (botConfig.respondToMentions) {
     bot.inboxLoop();
   }
