@@ -58,8 +58,6 @@ module.exports = class GenericBot {
         });
     }
 
-
-    //TODO: rewrite to Promises? 
     async #getModifiedText(text) {
         return new Promise((resolve, reject) => {
            
