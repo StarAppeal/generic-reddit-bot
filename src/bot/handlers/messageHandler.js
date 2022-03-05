@@ -26,6 +26,7 @@ module.exports = class MessageHandler {
 
     markMessageAsRead() {
         this.streamHandler.markMessagesAsRead([this.message]);
+        this.logger.info("message with id " + this.message.id + " was mark as read");
     }
 
 }

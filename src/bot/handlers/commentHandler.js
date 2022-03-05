@@ -7,20 +7,17 @@ module.exports = class CommentHandler {
     }
 
     async reply(text) {
-        if (debug) {
-            this.logger.info("Not replying because you are developing");
-            return false;
-        }
-        let result = false;
-        this.logger.info("Replying now");
-        this.comment
-            .reply(text)
-            .then(() => {
-                this.logger.info("Text of reply was: " + text);
-                result = true;
-            })
-            .catch(this.logger.error);
-        return result;
-    }
+        return new Promise((resolve, reject) => {
+            if (debug) {
+                reject("Not replying because you are developing");
+                return; 
+            }
+            this.logger.info("Replying now");
+            this.comment
+                .reply(text)
+                .then(() => resolve(text))
+                .catch(reject);
+        });
 
+    }
 }
