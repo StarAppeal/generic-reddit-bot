@@ -13,23 +13,23 @@ module.exports = class PostHandler {
     async shouldReplyTo(botName, tries = 1) {
         return new Promise((resolve, reject) => {
             this.#findCommentToRespondTo().then(comment => {
-                    comment.expandReplies().then(c => {
-                        c.replies.forEach(reply => {
-                            if (reply.author.name === botName) reject(`Already replied to post with id ${this.post.id}.`);
-                        });
-                        resolve(comment);
+                comment.expandReplies().then(c => {
+                    c.replies.forEach(reply => {
+                        if (reply.author.name === botName) reject(`Already replied to post with id ${this.post.id}.`);
                     });
-                }).catch(async (error) => {
-                    this.logger.info(error);
-                    if (tries <= maxAmountOfTries) {
-                        this.logger.info("this was try number: " + tries)
-                        await sleep(60000);
-                        await this.#renewPost();
-                        return resolve(this.shouldReplyTo(botName, tries + 1));
-                    } else {
-                        return reject("max amount of tries (" + maxAmountOfTries + ") reached")
-                    }
+                    resolve(comment);
                 });
+            }).catch(async (error) => {
+                this.logger.info(error);
+                if (tries <= maxAmountOfTries) {
+                    this.logger.info("this was try number: " + tries)
+                    await sleep(60000);
+                    await this.#renewPost();
+                    return resolve(this.shouldReplyTo(botName, tries + 1));
+                } else {
+                    return reject("max amount of tries (" + maxAmountOfTries + ") reached")
+                }
+            });
         });
     }
 
@@ -57,13 +57,12 @@ module.exports = class PostHandler {
     async #findCommentToRespondTo() {
         return new Promise((resolve, reject) => {
             this.post.expandReplies().then(post => {
-                const comments = post.comments; 
-                comments.sort((a, b) => {
-                        return a.created_utc- b.created_utc; 
+                post.comments.sort((a, b) => {
+                    return a.created_utc - b.created_utc;
                 }).forEach(comment => {
                     if (comment.author_fullname === this.respondToID) {
                         resolve(comment);
-                    }                  
+                    }
                 });
                 reject(`No comment found with respondToID "${this.respondToID}".`);
             });
