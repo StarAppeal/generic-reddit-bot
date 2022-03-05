@@ -47,15 +47,15 @@ module.exports = class GenericBot {
             postHandler.logPost();
             postHandler.shouldReplyTo(this.botConfig.name).then(async (comment) => {
                 this.logger.info("Post should be replied to.");
-                let modifiedText = await this.#getModifiedText(postHandler.getText());
-                let commentHandler = new CommentHandler(comment, this.logger);
+                const modifiedText = await this.#getModifiedText(postHandler.getText());
+                const commentHandler = new CommentHandler(comment, this.logger);
                 commentHandler.reply(modifiedText);
             }).catch(this.logger.info);
         });
     }
 
 
-    //this is ugly => rewrite to Promises? 
+    //TODO: rewrite to Promises? 
     async #getModifiedText(text) {
         const url = this.botConfig.restURL;
         const textObject = {
@@ -68,7 +68,7 @@ module.exports = class GenericBot {
             const response = await axios.post(url, textObject);
             this.logger.info("POST request took " + response.data.time + "ms");
 
-            const result = response.data.text;
+            let result = response.data.text;
 
             if (result.length > maxCommentLength) {
                 this.logger.info("Text too long");
