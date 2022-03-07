@@ -1,20 +1,17 @@
-require("dotenv").config();
-const logger = require("./config/logger");
+// set development if node_env => undefined
+process.env.NODE_ENV = process.env.NODE_ENV || "development";
 
-const app = require("./app");
-const http = require("http");
+const GenericBot = require("./bot/genericBot")
 
-const roboter = require("./roboter/genericBoter");
+const bots = require("./config/robots.json").bots;
 
-var port = process.argv[2] === "DEBUG" ? 81 : process.env.PORT;
+bots.forEach(startBot);
 
-http.createServer(app).listen(port, function () {
-  console.log("App listens on port: " + this.address().port);
-
-  try {
-    roboter.inboxLoop();
-    roboter.startStream();
-  } catch (error) {
-    logger.error(error);
+function startBot(botConfig) {
+  const bot = new GenericBot(botConfig);
+  if (botConfig.respondToMentions) {
+    bot.inboxLoop();
   }
-});
+  
+  bot.startBot();
+}
