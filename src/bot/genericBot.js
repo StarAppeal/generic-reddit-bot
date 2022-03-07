@@ -1,3 +1,5 @@
+const debug = process.env.NODE_ENV !== "production";
+
 const axios = require("axios");
 
 const streamConfigCreator = require("../creator/streamConfigCreator");
@@ -17,8 +19,8 @@ const maxCommentLength = 10000;
 module.exports = class GenericBot {
     constructor(botConfig) {
         this.botConfig = botConfig;
-        this.streamHandler = new StreamHandler(streamConfigCreator.createStreamConfig(botConfig));
-        this.logger = loggerCreator.createLogger(botConfig.name);
+        this.streamHandler = new StreamHandler(streamConfigCreator.createStreamConfig(botConfig, debug));
+        this.logger = loggerCreator.createLogger(botConfig.name, debug);
     }
 
     async inboxLoop() {
@@ -32,7 +34,7 @@ module.exports = class GenericBot {
                 const commentHandler = new CommentHandler(comment, this.logger);
                 messageHandler.getTextToRespond()
                     .then(text => this.#getModifiedText(text))
-                    .then(modifiedText => commentHandler.reply(modifiedText))
+                    .then(modifiedText => commentHandler.reply(modifiedText, debug))
                     .then(reply => {
                         this.logger.info("Text of reply was: " + reply);
                         messageHandler.markMessageAsRead();
@@ -53,7 +55,7 @@ module.exports = class GenericBot {
                     const commentHandler = new CommentHandler(comment, this.logger);
                     this.logger.info("Post should be replied to.");
                     this.#getModifiedText(postHandler.getText())
-                        .then(modifiedText => commentHandler.reply(modifiedText))
+                        .then(modifiedText => commentHandler.reply(modifiedText, debug))
                         .then(reply => this.logger.info("Text of reply was" + reply))
                         .catch(this.logger.error);
                 }).catch(this.logger.info);

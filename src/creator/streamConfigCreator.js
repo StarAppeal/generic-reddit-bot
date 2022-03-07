@@ -3,7 +3,7 @@ const { SubmissionStream, InboxStream } = require("snoostorm");
 const Snoowrap = require("snoowrap");
 const Snoostorm = require("snoostorm");
 
-function createStreamConfig(botConfig){
+function createStreamConfig(botConfig, debug){
   const snoowrap = new Snoowrap({
     userAgent:
       "linux:" + botConfig.name + ":1.0 (by " + botConfig.developers + ")",
@@ -11,6 +11,7 @@ function createStreamConfig(botConfig){
     clientSecret: botConfig.clientSecret,
     refreshToken: botConfig.refreshToken,
   });
+  snoowrap.config({continueAfterRatelimitError: true, debug})
 
   const submissionStream = new SubmissionStream(snoowrap, {
     subreddit: botConfig.subreddit,
