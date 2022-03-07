@@ -1,6 +1,6 @@
 const { createLogger, format, transports } = require("winston");
 
-function _createLogger(botName){
+function _createLogger(botName,debug){
   let logger = createLogger({
     level: "info",
     format: format.combine(
@@ -31,7 +31,7 @@ function _createLogger(botName){
   // If we're in development mode then **ALSO** log to the `console`
   // with the colorized simple format.
   //
-  if (process.env.NODE_ENV === "development") {
+  if (debug) {
     logger.add(
       new transports.Console({
         format: format.combine(format.colorize(), format.simple()),
