@@ -10,7 +10,7 @@ const MessageHandler = require("./handlers/messageHandler");
 const CommentHandler = require("./handlers/commentHandler");
 const PostHandler = require("./handlers/postHandler");
 
-const valueTextToLong = "Text zu lang zum kommentieren :(";
+const valueTextTooLong = "Text zu lang zum kommentieren :(";
 const maxCommentLength = 10000;
 
 //TODO: we are currently not getting any notification if any error occurs
@@ -24,10 +24,10 @@ module.exports = class GenericBot {
     }
 
     async inboxLoop() {
-        this.logger.info("starting inboxLoop for Bot: " + this.botConfig.name);
+        this.logger.info(`starting inboxLoop for Bot: ${this.botConfig.name}`);
         this.streamHandler.inboxStream(async (msg) => {
             const messageHandler = new MessageHandler(msg, this.logger, this.streamHandler);
-            this.logger.info("MessageId is " + msg.id);
+            this.logger.info(`MessageId is ${msg.id}`);
             if (messageHandler.isMention(this.botConfig.name)) {
                 this.logger.info("message is a mention, gonna reply to it");
                 const comment = await this.streamHandler.getComment(msg.id);
@@ -36,7 +36,7 @@ module.exports = class GenericBot {
                     .then(text => this.#getModifiedText(text))
                     .then(modifiedText => commentHandler.reply(modifiedText, debug))
                     .then(reply => {
-                        this.logger.info("Text of reply was: " + reply);
+                        this.logger.info(`Text of reply was: ${reply}`);
                         messageHandler.markMessageAsRead();
                     })
                     .catch(this.logger.error);
@@ -45,7 +45,7 @@ module.exports = class GenericBot {
     }
 
     async startBot() {
-        this.logger.info("starting bot " + this.botConfig.name)
+        this.logger.info(`starting bot ${this.botConfig.name}`)
         this.streamHandler.postStream(async (post) => {
             //TODO: change params, maybe
             const postHandler = new PostHandler(post, this.logger, this.botConfig.respondToID, this.streamHandler);
@@ -56,7 +56,7 @@ module.exports = class GenericBot {
                     this.logger.info("Post should be replied to.");
                     this.#getModifiedText(postHandler.getText())
                         .then(modifiedText => commentHandler.reply(modifiedText, debug))
-                        .then(reply => this.logger.info("Text of reply was" + reply))
+                        .then(reply => this.logger.info(`Text of reply was: ${reply}`))
                         .catch(this.logger.error);
                 }).catch(this.logger.info);
         });
@@ -69,14 +69,14 @@ module.exports = class GenericBot {
                 text: text,
             };
 
-            this.logger.info("Getting modified text from " + url);
+            this.logger.info(`Getting modified text from ${url}`);
 
             axios.post(url, textObject).then(response => {
-                this.logger.info("POST request took " + response.data.time + "ms");
+                this.logger.info(`POST request took ${response.data.time}ms`);
                 let result = response.data.text;
                 if (result.length > maxCommentLength) {
                     this.logger.info("Text too long");
-                    return resolve(this.#getModifiedText(valueTextToLong));
+                    return resolve(this.#getModifiedText(valueTextTooLong));
                 }
                 resolve(result);
             }).catch(reject);

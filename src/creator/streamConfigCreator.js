@@ -6,7 +6,7 @@ const Snoostorm = require("snoostorm");
 function createStreamConfig(botConfig, debug){
   const snoowrap = new Snoowrap({
     userAgent:
-      "linux:" + botConfig.name + ":1.0 (by " + botConfig.developers + ")",
+    `linux:${botConfig.name}:1.0 (by ${botConfig.developers})`,
     clientId: botConfig.clientId,
     clientSecret: botConfig.clientSecret,
     refreshToken: botConfig.refreshToken,

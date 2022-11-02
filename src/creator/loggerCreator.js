@@ -18,11 +18,11 @@ function _createLogger(botName,debug){
     },
     transports: [
       new transports.File({
-        filename: "./logs/" + botName + "/error.log",
+        filename: `./logs/${botName}/error.log`,
         level: "error",
       }),
       new transports.File({
-        filename: "./logs/" + botName + "/combined.log",
+        filename: `./logs/${botName}/combined.log`,
       }),
     ],
   });
