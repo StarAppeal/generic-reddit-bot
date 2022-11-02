@@ -20,13 +20,13 @@ module.exports = class MessageHandler {
             } else if (ar[0] === "t3") {
                 resolve((await this.streamHandler.getSubmission(ar[1])).selftext);
             }
-            reject("unknown parentId type " + this.message.parent_id);
+            reject(`unknown parentId type ${this.message.parent_id}`);
         });
     }
 
     markMessageAsRead() {
         this.streamHandler.markMessagesAsRead([this.message]);
-        this.logger.info("message with id " + this.message.id + " was marked as read");
+        this.logger.info(`message with id ${this.message.id} was marked as read`);
     }
 
 }
