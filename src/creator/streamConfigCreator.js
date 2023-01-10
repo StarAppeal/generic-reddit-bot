@@ -3,15 +3,19 @@ const { SubmissionStream, InboxStream } = require("snoostorm");
 const Snoowrap = require("snoowrap");
 const Snoostorm = require("snoostorm");
 
-function createStreamConfig(botConfig, debug){
+function createStreamConfig(botConfig, debug) {
   const snoowrap = new Snoowrap({
-    userAgent:
-    `linux:${botConfig.name}:1.0 (by ${botConfig.developers})`,
+    userAgent: `linux:${botConfig.name}:1.0 (by ${botConfig.developers})`,
     clientId: botConfig.clientId,
     clientSecret: botConfig.clientSecret,
     refreshToken: botConfig.refreshToken,
   });
-  snoowrap.config({continueAfterRatelimitError: true, debug})
+  snoowrap.config({
+    continueAfterRatelimitError: true,
+    retryErrorCodes: [500, 502, 503, 504, 522],
+    requestDelay: 1000,
+    debug,
+  });
 
   const submissionStream = new SubmissionStream(snoowrap, {
     subreddit: botConfig.subreddit,
@@ -22,10 +26,10 @@ function createStreamConfig(botConfig, debug){
   const inboxStream = new InboxStream(snoowrap, {
     filter: "unread",
     pollTime: botConfig.pollTime,
-    limit: botConfig.pollLimit
+    limit: botConfig.pollLimit,
   });
 
-  return {inboxStream, submissionStream, wrap: snoowrap}
+  return { inboxStream, submissionStream, wrap: snoowrap };
 }
 
 module.exports = { createStreamConfig };
