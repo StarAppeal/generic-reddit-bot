@@ -3,3 +3,5 @@ node_modules/
 *.log
 src/config/robots.json
 /logs
+*.sh
+.envrc
